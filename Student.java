@@ -15,8 +15,11 @@ public class Student{
             System.out.println("Failed to connect to database");
             return;
         }
-        getUserInput();
-
+        try{
+            getUserInput();
+        } catch (Exception e) {
+            System.out.println("Error encountered: " + e);
+        }
     }
 
     public static void connectToDatabase() throws Exception
@@ -62,8 +65,7 @@ public class Student{
 
     }
 
-    public static void getUserInput()
-    {
+    public static void getUserInput() throws SQLException {
         Scanner sc = new Scanner(System.in);
         String input;
         int intInput;
@@ -88,6 +90,8 @@ public class Student{
                     System.out.println("Search by one or more attributes");
                     break;
                 case 4:
+                    stmt.close();
+                    con.close();
                     break inputLoop;
                 default:
                     System.out.println("Please enter a valid menu option.");
