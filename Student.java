@@ -2,6 +2,7 @@ import java.io.*;
 import java.sql.*;
 import java.util.*;
 import oracle.jdbc.driver.*;
+import org.apache.ibatis.jdbc.ScriptRunner;
 
 public class Student{
     static Connection con;
@@ -14,6 +15,11 @@ public class Student{
         } catch (Exception e) {
             System.out.println("Failed to connect to database");
             return;
+        }
+        try {
+            runStartupScript();
+        } catch (Exception e) {
+            System.out.println("Failed to run startup script: " + e);
         }
         try{
             getUserInput();
@@ -63,6 +69,17 @@ public class Student{
             throw e;
         }
 
+    }
+
+    public static void runStartupScript() throws FileNotFoundException {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter path to sql script file: ");
+        String path = sc.nextLine();
+
+        ScriptRunner sr = new ScriptRunner(con);
+        sr.setLogWriter(null);
+        sr.runScript(new java.io.FileReader(path));
+        System.out.println("Script executed successfully.");
     }
 
     public static void getUserInput() throws SQLException {
