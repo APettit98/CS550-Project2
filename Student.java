@@ -82,6 +82,72 @@ public class Student{
         System.out.println("Script executed successfully.");
     }
 
+    public static void viewTableContents() throws SQLException {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("View PUBLICATIONS table? (Yes/No): ");
+        String viewPublications = sc.nextLine();
+
+        if (viewPublications.equalsIgnoreCase("yes")) {
+            String publicationQuery = "SELECT * FROM PUBLICATIONS";
+            ResultSet rs = stmt.executeQuery(publicationQuery);
+            while (rs.next()) {
+                System.out.println("PUBLICATION ID: " + rs.getInt("PUBLICATIONID"));
+                System.out.println("TITLE         : " + rs.getString("TITLE"));
+                System.out.println("YEAR          : " + rs.getInt("YEAR"));
+                System.out.println("TYPE          : " + rs.getString("TYPE"));
+                System.out.println("SUMMARY       : " + rs.getString("SUMMARY"));
+                System.out.println("------------------------------------------------------------");
+            }
+            rs.close();
+        }
+
+        System.out.print("View AUTHORS table? (Yes/No): ");
+        String viewAuthors = sc.nextLine();
+
+        if (viewAuthors.equalsIgnoreCase("yes")) {
+            String authorQuery = "SELECT * FROM AUTHORS";
+            ResultSet rs = stmt.executeQuery(authorQuery);
+            while (rs.next()) {
+                System.out.println("PUBLICATION ID: " + rs.getInt("PUBLICATIONID"));
+                System.out.println("AUTHOR        : " + rs.getString("AUTHOR"));
+                System.out.println("------------------------------------------------------------");
+            }
+            rs.close();
+        }
+    }
+
+    public static void searchByPublicationId() throws SQLException {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter PUBLICATIONID: ");
+        int publicationId = Integer.parseInt(sc.nextLine());
+
+        String searchPubIdQuery = """
+        SELECT P.PUBLICATIONID, P.TITLE, P.YEAR, P.TYPE, P.SUMMARY, COUNT(A.AUTHOR) AS NUM_AUTHORS
+        FROM PUBLICATIONS P LEFT JOIN AUTHORS A ON P.PUBLICATIONID = A.PUBLICATIONID
+        WHERE P.PUBLICATIONID = ?
+        GROUP BY P.PUBLICATIONID, P.TITLE, P.YEAR, P.TYPE, P.SUMMARY
+        """;
+
+        PreparedStatement pstmt = con.prepareStatement(searchPubIdQuery);
+        pstmt.setInt(1, publicationId);
+        ResultSet rs = pstmt.executeQuery();
+
+        if (rs.next()) {
+            System.out.println("PUBLICATION ID: " + rs.getInt("PUBLICATIONID"));
+            System.out.println("TITLE: " + rs.getString("TITLE"));
+            System.out.println("YEAR: " + rs.getInt("YEAR"));
+            System.out.println("TYPE: " + rs.getString("TYPE"));
+            System.out.println("SUMMARY: " + rs.getString("SUMMARY"));
+            System.out.println("NUMBER OF AUTHORS: " + rs.getInt("NUM_AUTHORS"));
+        } else {
+            System.out.println("No result found for PUBLICATIONID: " + publicationId);
+        }
+
+        rs.close();
+        pstmt.close();
+    }
+
     public static void getUserInput() throws SQLException {
         Scanner sc = new Scanner(System.in);
         String input;
@@ -99,9 +165,11 @@ public class Student{
             switch(intInput) {
                 case 1:
                     System.out.println("View table contents");
+                    viewTableContents();
                     break;
                 case 2:
                     System.out.println("Search by PUBLICATIONID");
+                    searchByPublicationId();
                     break;
                 case 3:
                     System.out.println("Search by one or more attributes");
