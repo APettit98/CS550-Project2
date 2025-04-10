@@ -1,2 +1,11 @@
+# Ignore IntelliJ project settings
 .idea/
+
+# Ignore compiled class files
 out/
+
+# Ignore OS-specific or editor-specific files
+*.class
+*.log
+.DS_Store
+Thumbs.db
