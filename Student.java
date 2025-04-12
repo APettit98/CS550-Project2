@@ -31,8 +31,7 @@ public class Student{
     public static void connectToDatabase() throws Exception
     {
         String driverPrefixURL="jdbc:oracle:thin:@";
-        //String jdbc_url="artemis.vsnet.gmu.edu:1521/vse18c.vsnet.gmu.edu";
-        String jdbc_url="localhost:1521";
+        String jdbc_url="artemis.vsnet.gmu.edu:1521/vse18c.vsnet.gmu.edu";
 
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter db username: ");
