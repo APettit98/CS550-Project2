@@ -1,11 +1,26 @@
-# Ignore IntelliJ project settings
+# IntelliJ project files
 .idea/
+*.iml
 
-# Ignore compiled class files
+# Build output
 out/
-
-# Ignore OS-specific or editor-specific files
 *.class
+
+# Logs
 *.log
+
+# OS-specific files
 .DS_Store
 Thumbs.db
+
+# Backup or temp files
+*.swp
+*.tmp
+
+# Optional: Ignore IDE-specific metadata
+*.iws
+*.ipr
+
+# Optional: Maven or Gradle (if used later)
+target/
+build/
