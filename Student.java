@@ -122,7 +122,13 @@ public class Student{
     public static void searchByPublicationId() throws SQLException {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter PUBLICATIONID: ");
-        int publicationId = Integer.parseInt(sc.nextLine());
+        int publicationId;
+        try {
+            publicationId = Integer.parseInt(sc.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid Publication ID");
+            return;
+        }
 
         String searchPubIdQuery = """
         SELECT P.PUBLICATIONID, P.TITLE, P.YEAR, P.TYPE, P.SUMMARY, COUNT(A.AUTHOR) AS NUM_AUTHORS
@@ -218,6 +224,12 @@ public class Student{
         String title = sc.nextLine();
         System.out.print("YEAR: ");
         String year = sc.nextLine();
+        try {
+            Integer.parseInt(year);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input - YEAR must be an integer.");
+            return;
+        }
         System.out.print("TYPE: ");
         String type = sc.nextLine();
 
