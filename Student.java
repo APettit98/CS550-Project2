@@ -11,28 +11,37 @@ public class Student{
     public static void main(String argv[])
     {
         try {
+            //Method to connect to database
             connectToDatabase();
         } catch (Exception e) {
             System.out.println("Failed to connect to database");
             return;
         }
         try {
+            //Method to execute SQL script
             runStartupScript();
         } catch (Exception e) {
             System.out.println("Failed to run startup script: " + e);
         }
         try{
+            //Launches interactive menu for the user
             getUserInput();
         } catch (Exception e) {
             System.out.println("Error encountered: " + e);
         }
     }
 
+    /**
+     * Method to connect to Oracle Database, based on the connection string provided
+     * @throws Exception
+     */
     public static void connectToDatabase() throws Exception
     {
+        //JDBC url
         String driverPrefixURL="jdbc:oracle:thin:@";
         String jdbc_url="artemis.vsnet.gmu.edu:1521/vse18c.vsnet.gmu.edu";
 
+        //Prompts the db username and password
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter db username: ");
         String username = sc.nextLine();
@@ -47,12 +56,14 @@ public class Student{
             throw e;
         }
 
+        //Attempts to establish a connection to the Oracle database using user input
         try{
             System.out.println(driverPrefixURL+jdbc_url);
             con=DriverManager.getConnection(driverPrefixURL+jdbc_url, username, password);
             DatabaseMetaData dbmd=con.getMetaData();
             stmt=con.createStatement();
 
+            //Once connection is successful, the metadata of the DB will display (if it exists)
             System.out.println("Connected.");
 
             if(dbmd==null){
@@ -64,25 +75,44 @@ public class Student{
                 System.out.println("Database Driver Name: "+dbmd.getDriverName());
                 System.out.println("Database Driver Version: "+dbmd.getDriverVersion());
             }
+        //Error message will display if the connection is not successful
         } catch( Exception e) {
             e.printStackTrace();
             throw e;
         }
 
     }
+    /**
+     Prompts the user to input the file path of a SQL script and executes it against the connected database.
 
+     The method uses MyBatis's ScriptRunner to:
+     - Read SQL commands from the specified file
+     - Execute the script
+
+     It assumes a valid database connection is already established (`con` is not null).
+     * @throws FileNotFoundException
+     **/
     public static void runStartupScript() throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter path to sql script file: ");
         String path = sc.nextLine();
 
+        // Use ScriptRunner to execute the SQL script on the existing database connection
         ScriptRunner sr = new ScriptRunner(con);
         sr.setLogWriter(null);
         sr.runScript(new FileReader(path));
         System.out.println("Script executed successfully.");
     }
 
+    /**
+     * The following method will allow the user to view Publication and Author records
+     * @throws SQLException
+     */
     public static void viewTableContents() throws SQLException {
+        /** Allows the user to determine if they would like to view records in the Publications table
+            If the user enters 'Y' or 'Yes', the connection object will send the query statement
+            to the DB server
+         **/
         Scanner sc = new Scanner(System.in);
 
         System.out.print("View PUBLICATIONS table? (Yes/No): ");
@@ -92,6 +122,8 @@ public class Student{
             String publicationQuery = "SELECT * FROM PUBLICATIONS";
             ResultSet rs = stmt.executeQuery(publicationQuery);
             System.out.println("\n------------------------------------------------------------");
+
+            //Prints tuples in the Publications table
             while (rs.next()) {
                 System.out.println("PUBLICATION ID: " + rs.getInt("PUBLICATIONID"));
                 System.out.println("TITLE         : " + rs.getString("TITLE"));
@@ -100,9 +132,14 @@ public class Student{
                 System.out.println("SUMMARY       : " + rs.getString("SUMMARY"));
                 System.out.println("------------------------------------------------------------");
             }
+            //Closes the result set, after all records are returned
             rs.close();
         }
 
+        /** Allows the user to determine if they would like to view records in the Authors table
+         If the user enters 'Y' or 'Yes', the connection object will send the query statement
+         to the DB server
+         **/
         System.out.print("View AUTHORS table? (Yes/No): ");
         String viewAuthors = sc.nextLine();
 
@@ -110,16 +147,30 @@ public class Student{
             String authorQuery = "SELECT * FROM AUTHORS";
             ResultSet rs = stmt.executeQuery(authorQuery);
             System.out.println("\n------------------------------------------------------------");
+
+            //Prints tuples in the Authors table
             while (rs.next()) {
                 System.out.println("PUBLICATION ID: " + rs.getInt("PUBLICATIONID"));
                 System.out.println("AUTHOR        : " + rs.getString("AUTHOR"));
                 System.out.println("------------------------------------------------------------");
             }
+            //Closes the result set, after all records are returned
             rs.close();
         }
     }
 
+    /**
+     * The following method will allow the user to search by PublicationId
+     * Upon entering a valid PublicationId, all attributes from the Publications table will return,
+     * including the number of authors associated with the PublicationId.
+     * @throws SQLException
+     */
     public static void searchByPublicationId() throws SQLException {
+
+        /** Allows the user to enter a PublicationId
+         Upon entering a PublicationId, the connection object will send the query statement
+         to the DB server
+         **/
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter PUBLICATIONID: ");
         int publicationId;
@@ -142,6 +193,8 @@ public class Student{
         ResultSet rs = pstmt.executeQuery();
 
         System.out.println("\n------------------------------------------------------------");
+
+        //Prints records, based on the query statement that has been passed in by the Connection object
         if (rs.next()) {
             System.out.println("PUBLICATION ID   : " + rs.getInt("PUBLICATIONID"));
             System.out.println("TITLE            : " + rs.getString("TITLE"));
@@ -151,62 +204,80 @@ public class Student{
             System.out.println("NUMBER OF AUTHORS: " + rs.getInt("NUM_AUTHORS"));
             System.out.println("------------------------------------------------------------");
         } else {
+            //If the PublicationId does not exist, no records will return
             System.out.println("No result found for PUBLICATIONID: " + publicationId);
         }
 
+        //Closes the result set and prepared statement, after all records are returned
         rs.close();
         pstmt.close();
     }
 
+    /** This method handles user interaction through a command-line menu.
+        It loops until the user chooses to exit and calls the corresponding methods based on user input.
+     **/
     public static void getUserInput() throws SQLException {
-        Scanner sc = new Scanner(System.in);
-        String input;
-        int intInput;
+        Scanner sc = new Scanner(System.in); // Scanner to read user input
+        String input; // Holds raw input from user
+        int intInput; // Parsed integer value from user input
+
         inputLoop: while (true) {
-            printMenu();
-            input = sc.nextLine();
+            printMenu(); // Display the main menu options
+            input = sc.nextLine(); // Read user input as a string
+
             try {
-                intInput = Integer.parseInt(input);
+                intInput = Integer.parseInt(input); // Try to parse input into an integer
             } catch (NumberFormatException e) {
+                // If parsing fails, notify the user and continue the loop
                 System.out.println("Please enter a valid menu option.");
                 continue;
             }
 
-            switch(intInput) {
+            // Determine which action to take based on the parsed menu input
+            switch (intInput) {
                 case 1:
-                    System.out.println("View table contents");
+                    // Option 1: View contents of PUBLICATIONS and/or AUTHORS table
                     viewTableContents();
                     break;
                 case 2:
-                    System.out.println("Search by PUBLICATIONID");
+                    // Option 2: Search for a publication by its unique PUBLICATIONID
                     searchByPublicationId();
                     break;
                 case 3:
+                    // Option 3: Search using one or more user-specified attributes
                     searchByAttributes();
                     break;
                 case 4:
+                    // Option 4: Exit program — close database resources and break loop
                     stmt.close();
                     con.close();
                     break inputLoop;
                 default:
+                    // If user input doesn't match any valid menu option
                     System.out.println("Please enter a valid menu option.");
                     break;
             }
-
         }
-
     }
 
+
+    /** This method displays the main menu options to the user.
+        It is called each time the program waits for user input.
+     */
     public static void printMenu() {
+        // Print a blank line followed by the menu options
         System.out.println("""
                 
-                Please enter a menu option
-                1. View table contents
-                2. Search by PUBLICATIONID
-                3. Search by one or more attributes
-                4. Exit""");
+            Please enter a menu option
+            1. View table contents
+            2. Search by PUBLICATIONID
+            3. Search by one or more attributes
+            4. Exit""");
+
+        // Prompt symbol to indicate the user should enter input
         System.out.print(">>>");
     }
+
 
     public static void searchByAttributes() throws SQLException {
         // If user wants to view authors, need to query authors table
