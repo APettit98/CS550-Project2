@@ -114,9 +114,19 @@ public class Student{
             to the DB server
          **/
         Scanner sc = new Scanner(System.in);
+        String viewPublications;
 
-        System.out.print("View PUBLICATIONS table? (Yes/No): ");
-        String viewPublications = sc.nextLine();
+        while (true) {
+            System.out.print("View PUBLICATIONS table? (Y/N): ");
+            viewPublications = sc.nextLine();
+
+            if (viewPublications.equalsIgnoreCase("Y") ||
+            viewPublications.equalsIgnoreCase("N")) {
+                break;
+            } else {
+                System.out.print("Please enter either (Y/N) \n");
+            }
+        }
 
         if (viewPublications.toLowerCase().startsWith("y")) {
             String publicationQuery = "SELECT * FROM PUBLICATIONS";
@@ -140,8 +150,19 @@ public class Student{
          If the user enters 'Y' or 'Yes', the connection object will send the query statement
          to the DB server
          **/
-        System.out.print("View AUTHORS table? (Yes/No): ");
-        String viewAuthors = sc.nextLine();
+        String viewAuthors;
+
+        while (true) {
+            System.out.print("View AUTHORS table? (Y/N): ");
+            viewAuthors = sc.nextLine();
+
+            if (viewAuthors.equalsIgnoreCase("Y") ||
+                    viewAuthors.equalsIgnoreCase("N")) {
+                break;
+            } else {
+                System.out.print("Please enter either (Y/N) \n");
+            }
+        }
 
         if (viewAuthors.toLowerCase().startsWith("y")) {
             String authorQuery = "SELECT * FROM AUTHORS";
